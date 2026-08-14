@@ -41,7 +41,7 @@ variable "gemini_api_key" {
 variable "gemini_model" {
   description = "Gemini model name"
   type        = string
-  default     = "gemini-2.5-flash"
+  default     = "gemini-3.7-flash"
 }
 
 variable "ttl_days" {

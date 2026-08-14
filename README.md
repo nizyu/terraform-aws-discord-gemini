@@ -1,6 +1,6 @@
 # terraform-aws-discord-gemini
 
-Terraform module to deploy a fully serverless, thread-aware Discord AI Bot powered by Google Gemini (2.5 Flash) on AWS (Lambda Function URL + DynamoDB Streams CDC).
+Terraform module to deploy a fully serverless, thread-aware Discord AI Bot powered by Google Gemini (3.7 Flash) on AWS (Lambda Function URL + DynamoDB Streams CDC).
 
 ---
 
@@ -107,7 +107,7 @@ module "discord_gemini" {
   discord_public_key     = "YOUR_DISCORD_PUBLIC_KEY"
   discord_bot_token      = "YOUR_DISCORD_BOT_TOKEN"
   gemini_api_key         = "YOUR_GEMINI_API_KEY"
-  gemini_model           = "gemini-2.5-flash"
+  gemini_model           = "gemini-3.7-flash"
 }
 ```
 

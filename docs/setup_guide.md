@@ -73,7 +73,7 @@ discord_application_id = "YOUR_DISCORD_APPLICATION_ID"
 discord_public_key     = "YOUR_DISCORD_PUBLIC_KEY"
 discord_bot_token      = "YOUR_DISCORD_BOT_TOKEN"
 gemini_api_key         = "YOUR_GEMINI_API_KEY"
-gemini_model           = "gemini-2.5-flash"
+gemini_model           = "gemini-3.7-flash"
 ```
 
 ### 3.2 Lambda パッケージの準備

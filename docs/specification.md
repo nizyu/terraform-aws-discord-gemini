@@ -28,7 +28,7 @@ Discordの3秒応答制限（Interaction Timeout）を考慮し、前段Lambda�
 ### 2.2 技術スタック・非機能要件
 1. **クラウドインフラ**: AWS（Lambda Function URL, DynamoDB + Streams, IAM, CloudWatch Logs, SSM Parameter Store / Secrets Manager）
 2. **Lambdaランタイム**: Python 3.12（boto3, PyNaCl, google-genai, requests / urllib）
-3. **AIモデル**: Google Gemini API（デフォルト: `gemini-2.5-flash`、Terraform変数で変更可能）
+3. **AIモデル**: Google Gemini API（デフォルト: `gemini-3.7-flash`、Terraform変数で変更可能）
 4. **IaC**: Terraform Module として実装（再利用可能かつ容易にプロビジョニング可能）
 
 ---

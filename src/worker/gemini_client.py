@@ -16,7 +16,7 @@ GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
 
 class GeminiClient:
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-3.7-flash"):
         self.api_key = api_key
         self.model = model
 
