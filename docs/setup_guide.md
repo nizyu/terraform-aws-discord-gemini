@@ -76,24 +76,9 @@ gemini_api_key         = "YOUR_GEMINI_API_KEY"
 gemini_model           = "gemini-3.7-flash"
 ```
 
-### 3.2 Lambda パッケージの準備
-以下のいずれかの方法で Lambda パッケージを用意します:
+### 3.2 Terraform の初期化と適用
+本モジュールは、**GitHub Releases からビルド済み Lambda パッケージ（`ingress.zip`, `worker.zip`）を自動ダウンロード** します。利用者の PC への Python / pip のインストールや手動ダウンロードは不要です。
 
-- **方法 A: GitHub Releases からビルド済み zip をダウンロード（推奨）**:
-  [Releases ページ](https://github.com/nizyu/terraform-aws-discord-gemini/releases) から最新の `ingress.zip` と `worker.zip` をダウンロードし、リポジトリの `.build/` ディレクトリに配置します。
-  ```bash
-  mkdir -p .build
-  # 例: curl またはブラウザでダウンロードして .build/ に配置
-  # curl -L -o .build/ingress.zip https://github.com/nizyu/terraform-aws-discord-gemini/releases/latest/download/ingress.zip
-  # curl -L -o .build/worker.zip https://github.com/nizyu/terraform-aws-discord-gemini/releases/latest/download/worker.zip
-  ```
-
-- **方法 B: ローカルでビルドする場合**:
-  ```bash
-  python3 scripts/package.py
-  ```
-
-### 3.3 Terraform の初期化と適用
 インフラのデプロイを実行します:
 
 ```bash
@@ -103,6 +88,11 @@ terraform apply
 ```
 
 確認プロンプトで `yes` を入力します。
+
+> [!TIP]
+> **バージョンの指定やローカルビルドを使用する場合**:
+> - デフォルトでは `release_tag = "v1.0.0"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
+> - 自身でソースコードを変更してローカルビルドしたい場合は、`python3 scripts/package.py` でビルドした zip のパスを `ingress_zip_path` / `worker_zip_path` に指定することも可能です。
 
 ### 3.3 Interactions Endpoint URL の取得
 デプロイが完了すると、Outputs に以下のような Function URL が表示されます:

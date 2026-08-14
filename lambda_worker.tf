@@ -31,6 +31,7 @@ resource "aws_lambda_function" "worker" {
   depends_on = [
     aws_cloudwatch_log_group.worker,
     aws_iam_role_policy.worker,
+    local_sensitive_file.worker_zip,
   ]
 
   tags = merge(

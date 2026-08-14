@@ -29,6 +29,7 @@ resource "aws_lambda_function" "ingress" {
   depends_on = [
     aws_cloudwatch_log_group.ingress,
     aws_iam_role_policy.ingress,
+    local_sensitive_file.ingress_zip,
   ]
 
   tags = merge(

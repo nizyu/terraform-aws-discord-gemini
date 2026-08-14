@@ -74,6 +74,12 @@ variable "log_retention_in_days" {
   default     = 14
 }
 
+variable "release_tag" {
+  description = "Version tag of the release to download pre-built Lambda zip assets from GitHub Releases (e.g. v1.0.0)"
+  type        = string
+  default     = "v1.0.0"
+}
+
 variable "ingress_zip_path" {
   description = "Path to the pre-packaged Ingress Lambda zip file"
   type        = string

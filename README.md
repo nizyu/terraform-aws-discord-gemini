@@ -61,10 +61,11 @@ sequenceDiagram
 
 ```
 .
-├── main.tf                       # Module locals & configuration
-├── variables.tf                  # Module inputs
+├── main.tf                       # Module locals & provider configuration
+├── variables.tf                  # Module inputs (with release_tag)
 ├── outputs.tf                    # Module outputs (Function URL, Table Name, ARNs)
-├── dynamodb.tf                   # DynamoDB Table with Streams and TTL
+├── downloads.tf                  # Automatic download of release zip assets
+├── dynamodb.tf                   # DynamoDB Table with Streams, TTL, and PITR
 ├── lambda_ingress.tf             # Ingress Lambda Function & Function URL
 ├── lambda_worker.tf              # Worker Lambda Function & Stream Mapping
 ├── iam.tf                        # IAM roles & minimal privilege policies
@@ -81,13 +82,11 @@ sequenceDiagram
 │   ├── package.py                # Lambda build & packaging script
 │   └── register_commands.py      # Slash command registration helper
 ├── docs/
-│   ├── specification.md          # Detailed specification
 │   └── setup_guide.md            # Step-by-step setup guide
 └── examples/
     └── basic/                    # Example deployment configuration
         ├── main.tf
         ├── variables.tf
-        ├── outputs.tf
         └── terraform.tfvars.example
 ```
 
@@ -123,7 +122,6 @@ python scripts/register_commands.py \
 
 ## 📖 Documentation
 
-- [Specification Document (`docs/specification.md`)](docs/specification.md)
 - [Discord & AWS Setup Guide (`docs/setup_guide.md`)](docs/setup_guide.md)
 
 ---
