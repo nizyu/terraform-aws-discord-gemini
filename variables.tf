@@ -27,9 +27,9 @@ variable "gemini_api_key" {
 }
 
 variable "gemini_model" {
-  description = "Gemini model to use for chat responses"
+  description = "Gemini model to use for chat responses (e.g. gemini-2.0-flash, gemini-1.5-flash)"
   type        = string
-  default     = "gemini-3.7-flash"
+  default     = "gemini-2.0-flash"
 }
 
 variable "ttl_days" {

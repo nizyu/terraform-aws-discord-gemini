@@ -16,7 +16,7 @@ GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
 
 class GeminiClient:
-    def __init__(self, api_key: str, model: str = "gemini-3.7-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
         self.api_key = api_key
         self.model = model
 
@@ -67,12 +67,15 @@ class GeminiClient:
         req = urllib.request.Request(
             url,
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "Discord-Gemini-Bot/1.0",
+            },
             method="POST",
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=30) as res:
+            with urllib.request.urlopen(req, timeout=60) as res:
                 body = res.read().decode("utf-8")
                 response_json = json.loads(body)
 
