@@ -48,4 +48,19 @@ resource "aws_lambda_event_source_mapping" "dynamodb_stream" {
   batch_size                     = 1
   maximum_retry_attempts         = 3
   bisect_batch_on_function_error = true
+
+  filter_criteria {
+    filter {
+      pattern = jsonencode({
+        eventName = ["INSERT", "MODIFY"]
+        dynamodb = {
+          NewImage = {
+            status = {
+              S = ["PENDING"]
+            }
+          }
+        }
+      })
+    }
+  }
 }
