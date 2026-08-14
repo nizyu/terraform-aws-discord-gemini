@@ -1,0 +1,46 @@
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # Python dependencies for Ingress Lambda
+  - package-ecosystem: "pip"
+    directory: "/src/ingress"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Python dependencies for Worker Lambda
+  - package-ecosystem: "pip"
+    directory: "/src/worker"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Terraform root module
+  - package-ecosystem: "terraform"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "terraform"
+
+  # Terraform basic example
+  - package-ecosystem: "terraform"
+    directory: "/examples/basic"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "terraform"
