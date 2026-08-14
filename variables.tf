@@ -27,9 +27,9 @@ variable "gemini_api_key" {
 }
 
 variable "gemini_model" {
-  description = "Gemini model to use for chat responses (e.g. gemini-2.0-flash, gemini-1.5-flash)"
+  description = "Gemini model to use for chat responses (e.g. gemini-3.7-flash)"
   type        = string
-  default     = "gemini-2.0-flash"
+  default     = "gemini-3.7-flash"
 }
 
 variable "ttl_days" {
@@ -59,7 +59,7 @@ variable "worker_memory_size" {
 variable "worker_timeout" {
   description = "Timeout for Worker Lambda function (in seconds)"
   type        = number
-  default     = 60
+  default     = 120
 }
 
 variable "log_retention_in_days" {
