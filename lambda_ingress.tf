@@ -43,12 +43,4 @@ resource "aws_lambda_function" "ingress" {
 resource "aws_lambda_function_url" "ingress" {
   function_name      = aws_lambda_function.ingress.function_name
   authorization_type = "NONE"
-
-  cors {
-    allow_credentials = false
-    allow_origins     = ["*"]
-    allow_methods     = ["POST", "GET", "OPTIONS"]
-    allow_headers     = ["*"]
-    max_age           = 86400
-  }
 }
