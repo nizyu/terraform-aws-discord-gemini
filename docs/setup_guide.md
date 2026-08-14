@@ -92,14 +92,14 @@ terraform apply
 
 > [!TIP]
 > **バージョンの指定やローカルビルドを使用する場合**:
-> - デフォルトでは `release_tag = "v1.0.0"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
+> - デフォルトでは `release_tag = "v1.0.1"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
 > - 自身でソースコードを変更してローカルビルドしたい場合は、`python3 scripts/package.py` でビルドした zip のパスを `ingress_zip_path` / `worker_zip_path` に指定することも可能です。
 
 ### 3.3 Interactions Endpoint URL の取得
 デプロイが完了すると、Outputs に以下のような Function URL が表示されます:
 
 ```text
-discord_interactions_endpoint_url = "https://xxxxxx.lambda-url.ap-northeast-1.on.aws/"
+interactions_endpoint_url = "https://xxxxxx.lambda-url.ap-northeast-1.on.aws/"
 ```
 
 この URL をコピーします。

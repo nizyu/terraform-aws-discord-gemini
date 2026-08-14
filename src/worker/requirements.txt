@@ -1,1 +1,2 @@
-boto3>=1.43.63
+# AWS Lambda Python 3.12 runtime includes boto3 and botocore by default.
+# No external dependencies required for Worker Lambda.

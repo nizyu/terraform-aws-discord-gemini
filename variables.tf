@@ -69,9 +69,9 @@ variable "log_retention_in_days" {
 }
 
 variable "release_tag" {
-  description = "Version tag of the release to download pre-built Lambda zip assets from GitHub Releases (e.g. v1.0.0)"
+  description = "Version tag of the release to download pre-built Lambda zip assets from GitHub Releases (e.g. v1.0.1)"
   type        = string
-  default     = "v1.0.0"
+  default     = "v1.0.1"
 }
 
 variable "ingress_zip_path" {

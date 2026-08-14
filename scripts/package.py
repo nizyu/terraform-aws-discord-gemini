@@ -53,6 +53,14 @@ def build_ingress():
     # Copy source code
     shutil.copy2(ROOT_DIR / "src" / "ingress" / "handler.py", pkg_dir / "handler.py")
 
+    # Clean up unnecessary files to reduce zip size
+    for item in pkg_dir.rglob("__pycache__"):
+        if item.is_dir():
+            shutil.rmtree(item, ignore_errors=True)
+    for item in pkg_dir.glob("*.dist-info"):
+        if item.is_dir():
+            shutil.rmtree(item, ignore_errors=True)
+
     # Zip
     zip_directory(pkg_dir, BUILD_DIR / "ingress.zip")
 
