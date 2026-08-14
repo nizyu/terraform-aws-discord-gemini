@@ -13,7 +13,7 @@ resource "aws_lambda_function" "worker" {
   architectures = ["x86_64"]
 
   filename         = local.worker_zip_file
-  source_code_hash = fileexists(local.worker_zip_file) ? filebase64sha256(local.worker_zip_file) : null
+  source_code_hash = local.worker_source_hash
 
   memory_size = var.worker_memory_size
   timeout     = var.worker_timeout
