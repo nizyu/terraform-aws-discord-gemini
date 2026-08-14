@@ -6,6 +6,7 @@ Supports multi-turn chat conversations using context history.
 
 import json
 import logging
+import time
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Tuple
@@ -67,36 +68,54 @@ class GeminiClient:
             method="POST",
         )
 
-        try:
-            with urllib.request.urlopen(req, timeout=90) as res:
-                body = res.read().decode("utf-8")
-                response_json = json.loads(body)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with urllib.request.urlopen(req, timeout=60) as res:
+                    body = res.read().decode("utf-8")
+                    response_json = json.loads(body)
 
-                # Extract text
-                candidates = response_json.get("candidates", [])
-                if not candidates:
-                    finish_reason = response_json.get("promptFeedback", {}).get("blockReason", "UNKNOWN")
-                    raise RuntimeError(f"Gemini returned no candidates (blockReason: {finish_reason})")
+                    # Extract text
+                    candidates = response_json.get("candidates", [])
+                    if not candidates:
+                        finish_reason = response_json.get("promptFeedback", {}).get("blockReason", "UNKNOWN")
+                        raise RuntimeError(f"Gemini returned no candidates (blockReason: {finish_reason})")
 
-                candidate = candidates[0]
-                content = candidate.get("content", {})
-                parts = content.get("parts", [])
+                    candidate = candidates[0]
+                    content = candidate.get("content", {})
+                    parts = content.get("parts", [])
 
-                reply_text = "".join([p.get("text", "") for p in parts])
+                    reply_text = "".join([p.get("text", "") for p in parts])
 
-                # Append model turn to context
-                model_turn = {
-                    "role": "model",
-                    "parts": [{"text": reply_text}],
-                }
-                messages.append(model_turn)
+                    # Append model turn to context
+                    model_turn = {
+                        "role": "model",
+                        "parts": [{"text": reply_text}],
+                    }
+                    messages.append(model_turn)
 
-                return reply_text, messages
+                    return reply_text, messages
 
-        except urllib.error.HTTPError as e:
-            error_body = e.read().decode("utf-8") if e.fp else ""
-            logger.error(f"Gemini API HTTPError {e.code}: {error_body}")
-            raise RuntimeError(f"Gemini API Error ({e.code}): {error_body}")
-        except Exception as e:
-            logger.error(f"Gemini API error: {e}", exc_info=True)
-            raise
+            except urllib.error.HTTPError as e:
+                error_body = e.read().decode("utf-8") if e.fp else ""
+                # Retry on transient server errors (503 High Demand, 502, 504, 429 Rate Limit)
+                if e.code in (503, 502, 504, 429) and attempt < max_retries - 1:
+                    wait_seconds = (2 ** attempt) + 1
+                    logger.warning(
+                        f"Gemini API returned HTTP {e.code} (attempt {attempt + 1}/{max_retries}). "
+                        f"Retrying in {wait_seconds}s..."
+                    )
+                    time.sleep(wait_seconds)
+                    continue
+
+                logger.error(f"Gemini API HTTPError {e.code}: {error_body}")
+                raise RuntimeError(f"Gemini API Error ({e.code}): {error_body}")
+            except Exception as e:
+                if attempt < max_retries - 1 and isinstance(e, (TimeoutError, urllib.error.URLError)):
+                    wait_seconds = (2 ** attempt) + 1
+                    logger.warning(f"Gemini API connection error (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {wait_seconds}s...")
+                    time.sleep(wait_seconds)
+                    continue
+
+                logger.error(f"Gemini API error: {e}", exc_info=True)
+                raise
