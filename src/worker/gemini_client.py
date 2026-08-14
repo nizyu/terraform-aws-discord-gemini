@@ -26,17 +26,7 @@ class GeminiClient:
         context: List[Dict[str, Any]] = None,
         system_instruction: str = "You are a helpful, friendly, and concise assistant in a family Discord server. Answer in Japanese naturally and politely.",
     ) -> Tuple[str, List[Dict[str, Any]]]:
-        """Generate response from Gemini API given a new prompt and existing conversation context.
-
-        Args:
-            prompt: User's input text.
-            context: List of previous conversation turns in Gemini format:
-                     [{"role": "user", "parts": [{"text": "..."}]}, {"role": "model", "parts": [{"text": "..."}]}]
-            system_instruction: Optional system instruction.
-
-        Returns:
-            Tuple of (response_text, updated_context_list)
-        """
+        """Generate response from Gemini API given a new prompt and existing conversation context."""
         if context is None:
             context = []
 
@@ -53,6 +43,9 @@ class GeminiClient:
             "generationConfig": {
                 "temperature": 0.7,
                 "maxOutputTokens": 4096,
+                "thinkingConfig": {
+                    "thinkingLevel": "LOW",
+                },
             },
         }
 
@@ -67,12 +60,15 @@ class GeminiClient:
         req = urllib.request.Request(
             url,
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "Discord-Gemini-Bot/1.0",
+            },
             method="POST",
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=30) as res:
+            with urllib.request.urlopen(req, timeout=90) as res:
                 body = res.read().decode("utf-8")
                 response_json = json.loads(body)
 

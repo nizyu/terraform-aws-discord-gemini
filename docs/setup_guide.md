@@ -92,7 +92,7 @@ terraform apply
 
 > [!TIP]
 > **バージョンの指定やローカルビルドを使用する場合**:
-> - デフォルトでは `release_tag = "v1.0.1"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
+> - デフォルトでは `release_tag = "v1.0.4"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
 > - 自身でソースコードを変更してローカルビルドしたい場合は、`python3 scripts/package.py` でビルドした zip のパスを `ingress_zip_path` / `worker_zip_path` に指定することも可能です。
 
 ### 3.3 Interactions Endpoint URL の取得
@@ -118,43 +118,56 @@ interactions_endpoint_url = "https://xxxxxx.lambda-url.ap-northeast-1.on.aws/"
 
 ## 5. スラッシュコマンド (`/ask`) の登録
 
-提供されている Python スクリプトを実行して、Discord に `/ask` コマンドを登録します。
+Discord に `/ask` スラッシュコマンドを登録します。**`curl` コマンド** または **付属の Python スクリプト（pip 不要・標準ライブラリのみ）** のいずれかで登録できます。
 
-### 5.1 登録スクリプトの実行
+### 方法 A: `curl` で登録する（最も手軽・推奨）
+
+ターミナルで以下のコマンドを実行します（`<YOUR_APP_ID>` と `<YOUR_BOT_TOKEN>` を置き換えてください）:
 
 ```bash
-# プロジェクトルートに移動
-cd ../..
+# 全サーバー向けグローバル登録
+curl -X POST "https://discord.com/api/v10/applications/YOUR_DISCORD_APPLICATION_ID/commands" \
+  -H "Authorization: Bot YOUR_DISCORD_BOT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ask",
+    "description": "Gemini AIに質問や相談をします（スレッドで回答）",
+    "options": [
+      {
+        "name": "prompt",
+        "description": "質問・プロンプトの内容",
+        "type": 3,
+        "required": true
+      }
+    ]
+  }'
+```
 
-# 必要なライブラリをインストール
-pip install requests
+### 方法 B: Python スクリプトで登録する（pip インストール不要）
 
-# コマンド登録 (全サーバー向けグローバル登録)
+Python 標準ライブラリ（`urllib`）のみで動作するため、外部パッケージのインストールは不要です。
+
+```bash
 python scripts/register_commands.py \
   --application-id YOUR_DISCORD_APPLICATION_ID \
   --bot-token YOUR_DISCORD_BOT_TOKEN
 ```
 
 > [!TIP]
-> **ギルド（サーバー）限定登録をする場合**:
-> グローバル登録は反映に数分〜最大1時間程度かかる場合があります。特定のサーバーですぐにテストしたい場合は、`--guild-id YOUR_GUILD_ID` を指定してください（即時反映されます）。
-> ```bash
-> python scripts/register_commands.py \
->   --application-id YOUR_DISCORD_APPLICATION_ID \
->   --bot-token YOUR_DISCORD_BOT_TOKEN \
->   --guild-id YOUR_GUILD_ID
-> ```
+> **即時テストしたい場合（ギルド限定登録）**:
+> グローバル登録は Discord 全体に反映されるまで数分〜最大1時間程度かかる場合があります。特定のサーバーですぐにテストしたい場合は、URL 末尾に `/guilds/YOUR_GUILD_ID/commands` を付けるか、スクリプトに `--guild-id YOUR_GUILD_ID` を指定してください（即時反映されます）。
 
 ---
 
 ## 6. 動作確認
 
-1. **親チャンネルで実行**:
-   - チャンネルで `/ask prompt:こんにちは！自己紹介をしてください` と入力して送信します。
+1. **親チャンネルで質問する**:
+   - Discord のチャット欄に `/ask` と入力して選択します（自動で `prompt:` バッジが表示されます）。
+   - 続けて質問文（例: `こんにちは！自己紹介をしてください`）を入力して送信します。
    - Bot が「考え中...」と表示した後、新しいスレッドが自動作成され、そのスレッド内に Gemini からの返信が投稿されます。
-2. **スレッド内で継続して会話**:
-   - 作成されたスレッド内で `/ask prompt:さっきの話をもう少し詳しく教えて` と入力して送信します。
-   - 前回の会話を踏まえた回答がスレッド内に返信されます。
+2. **スレッド内で会話を継続する**:
+   - 作成されたスレッド内で同様に `/ask` を入力し、続けて質問（例: `さっきの話をもう少し詳しく教えて`）を入力して送信します。
+   - 前回の会話履歴を踏まえた回答がスレッド内に返信されます。
 
 ---
 

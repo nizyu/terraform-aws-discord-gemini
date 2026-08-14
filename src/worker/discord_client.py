@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 DISCORD_API_BASE_URL = "https://discord.com/api/v10"
+USER_AGENT = "DiscordBot (https://github.com/nizyu/terraform-aws-discord-gemini, 1.0.0)"
 MAX_DISCORD_MESSAGE_LENGTH = 2000
 
 
@@ -69,7 +70,10 @@ class DiscordClient:
         use_bot_auth: bool = False,
     ) -> Dict[str, Any]:
         url = f"{DISCORD_API_BASE_URL}{endpoint}"
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
+        }
 
         if use_bot_auth and self.bot_token:
             headers["Authorization"] = f"Bot {self.bot_token}"
