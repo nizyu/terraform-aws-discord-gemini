@@ -13,7 +13,7 @@ resource "aws_lambda_function" "ingress" {
   architectures = ["x86_64"]
 
   filename         = local.ingress_zip_file
-  source_code_hash = fileexists(local.ingress_zip_file) ? filebase64sha256(local.ingress_zip_file) : null
+  source_code_hash = local.ingress_source_hash
 
   memory_size = var.ingress_memory_size
   timeout     = var.ingress_timeout
