@@ -68,12 +68,13 @@ cp terraform.tfvars.example terraform.tfvars
 `terraform.tfvars` を開き、取得した値を設定します:
 
 ```hcl
-aws_region             = "ap-northeast-1"
 discord_application_id = "YOUR_DISCORD_APPLICATION_ID"
 discord_public_key     = "YOUR_DISCORD_PUBLIC_KEY"
 discord_bot_token      = "YOUR_DISCORD_BOT_TOKEN"
 gemini_api_key         = "YOUR_GEMINI_API_KEY"
-gemini_model           = "gemini-3.7-flash"
+
+# （オプション）リージョンを上書きしたい場合のみ指定（未指定時はAWS CLI/環境変数のデフォルトリージョンを使用）
+# aws_region           = "ap-northeast-1"
 ```
 
 ### 3.2 Terraform の初期化と適用

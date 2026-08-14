@@ -4,12 +4,6 @@ variable "name_prefix" {
   default     = "discord-gemini"
 }
 
-variable "environment" {
-  description = "Environment name (e.g. prod, dev, staging)"
-  type        = string
-  default     = "prod"
-}
-
 variable "discord_application_id" {
   description = "Discord Application ID from Discord Developer Portal"
   type        = string

@@ -1,19 +1,13 @@
 variable "aws_region" {
-  description = "AWS Region to deploy resources"
+  description = "AWS Region to deploy resources (leave null to use default AWS provider / CLI profile region)"
   type        = string
-  default     = "ap-northeast-1"
+  default     = null
 }
 
 variable "name_prefix" {
   description = "Prefix for all resources"
   type        = string
   default     = "discord-gemini"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "prod"
 }
 
 variable "discord_application_id" {

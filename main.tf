@@ -17,15 +17,14 @@ terraform {
 }
 
 locals {
-  resource_name_prefix = "${var.name_prefix}-${var.environment}"
+  resource_name_prefix = var.name_prefix
   ingress_zip_file     = var.ingress_zip_path != null ? var.ingress_zip_path : (length(local_sensitive_file.ingress_zip) > 0 ? local_sensitive_file.ingress_zip[0].filename : "${path.module}/.build/ingress.zip")
   worker_zip_file      = var.worker_zip_path != null ? var.worker_zip_path : (length(local_sensitive_file.worker_zip) > 0 ? local_sensitive_file.worker_zip[0].filename : "${path.module}/.build/worker.zip")
 
   common_tags = merge(
     {
-      Project     = var.name_prefix
-      Environment = var.environment
-      ManagedBy   = "Terraform"
+      Project   = var.name_prefix
+      ManagedBy = "Terraform"
     },
     var.tags
   )

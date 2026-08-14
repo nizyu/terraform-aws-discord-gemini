@@ -106,7 +106,11 @@ module "discord_gemini" {
   discord_public_key     = "YOUR_DISCORD_PUBLIC_KEY"
   discord_bot_token      = "YOUR_DISCORD_BOT_TOKEN"
   gemini_api_key         = "YOUR_GEMINI_API_KEY"
-  gemini_model           = "gemini-3.7-flash"
+}
+
+# The only output you need to register on Discord Developer Portal
+output "interactions_endpoint_url" {
+  value = module.discord_gemini.interactions_endpoint_url
 }
 ```
 
