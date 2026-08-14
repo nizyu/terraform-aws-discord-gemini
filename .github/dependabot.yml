@@ -5,6 +5,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 10
     labels:
       - "dependencies"
       - "github-actions"
@@ -14,6 +16,8 @@ updates:
     directory: "/src/ingress"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 10
     labels:
       - "dependencies"
       - "python"
@@ -23,6 +27,8 @@ updates:
     directory: "/src/worker"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 10
     labels:
       - "dependencies"
       - "python"
@@ -32,6 +38,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 10
     labels:
       - "dependencies"
       - "terraform"
@@ -41,6 +49,8 @@ updates:
     directory: "/examples/basic"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 10
     labels:
       - "dependencies"
       - "terraform"
