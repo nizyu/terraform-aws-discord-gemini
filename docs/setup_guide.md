@@ -76,10 +76,28 @@ gemini_api_key         = "YOUR_GEMINI_API_KEY"
 gemini_model           = "gemini-2.5-flash"
 ```
 
-### 3.2 Terraform の初期化と適用
-依存パッケージのビルドとインフラのデプロイを実行します:
+### 3.2 Lambda パッケージの準備
+以下のいずれかの方法で Lambda パッケージを用意します:
+
+- **方法 A: GitHub Releases からビルド済み zip をダウンロード（推奨）**:
+  [Releases ページ](https://github.com/nizyu/terraform-aws-discord-gemini/releases) から最新の `ingress.zip` と `worker.zip` をダウンロードし、リポジトリの `.build/` ディレクトリに配置します。
+  ```bash
+  mkdir -p .build
+  # 例: curl またはブラウザでダウンロードして .build/ に配置
+  # curl -L -o .build/ingress.zip https://github.com/nizyu/terraform-aws-discord-gemini/releases/latest/download/ingress.zip
+  # curl -L -o .build/worker.zip https://github.com/nizyu/terraform-aws-discord-gemini/releases/latest/download/worker.zip
+  ```
+
+- **方法 B: ローカルでビルドする場合**:
+  ```bash
+  python3 scripts/package.py
+  ```
+
+### 3.3 Terraform の初期化と適用
+インフラのデプロイを実行します:
 
 ```bash
+cd examples/basic
 terraform init
 terraform apply
 ```
