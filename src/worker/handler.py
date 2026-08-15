@@ -23,23 +23,68 @@ from gemini_client import GeminiClient
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
 GEMINI_FALLBACK_MODEL = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-3.6-flash")
-DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN", "")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "")
 TTL_DAYS = int(os.environ.get("TTL_DAYS", "7"))
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME) if DYNAMODB_TABLE_NAME else None
+ssm = boto3.client("ssm")
 deserializer = TypeDeserializer()
 
-gemini = GeminiClient(
-    api_key=GEMINI_API_KEY,
-    model=GEMINI_MODEL,
-    fallback_model=GEMINI_FALLBACK_MODEL if GEMINI_FALLBACK_MODEL else None,
-)
-discord = DiscordClient(bot_token=DISCORD_BOT_TOKEN)
+_cached_gemini_api_key = None
+_cached_bot_token = None
+
+
+def get_gemini_api_key() -> str:
+    """Retrieve and cache Gemini API Key from SSM Parameter Store or direct env."""
+    global _cached_gemini_api_key
+    if _cached_gemini_api_key:
+        return _cached_gemini_api_key
+
+    param_name = os.environ.get("GEMINI_API_KEY_PARAM")
+    if param_name:
+        try:
+            res = ssm.get_parameter(Name=param_name, WithDecryption=True)
+            _cached_gemini_api_key = res["Parameter"]["Value"]
+            return _cached_gemini_api_key
+        except Exception as e:
+            logger.error(f"Failed to fetch GEMINI_API_KEY from SSM ({param_name}): {e}")
+
+    _cached_gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
+    return _cached_gemini_api_key
+
+
+def get_discord_bot_token() -> str:
+    """Retrieve and cache Discord Bot Token from SSM Parameter Store or direct env."""
+    global _cached_bot_token
+    if _cached_bot_token:
+        return _cached_bot_token
+
+    param_name = os.environ.get("DISCORD_BOT_TOKEN_PARAM")
+    if param_name:
+        try:
+            res = ssm.get_parameter(Name=param_name, WithDecryption=True)
+            _cached_bot_token = res["Parameter"]["Value"]
+            return _cached_bot_token
+        except Exception as e:
+            logger.error(f"Failed to fetch DISCORD_BOT_TOKEN from SSM ({param_name}): {e}")
+
+    _cached_bot_token = os.environ.get("DISCORD_BOT_TOKEN", "")
+    return _cached_bot_token
+
+
+def get_gemini_client() -> GeminiClient:
+    return GeminiClient(
+        api_key=get_gemini_api_key(),
+        model=GEMINI_MODEL,
+        fallback_model=GEMINI_FALLBACK_MODEL if GEMINI_FALLBACK_MODEL else None,
+    )
+
+
+def get_discord_client() -> DiscordClient:
+    return DiscordClient(bot_token=get_discord_bot_token())
 
 
 def deserialize_dynamodb_image(image: Dict[str, Any]) -> Dict[str, Any]:
@@ -48,6 +93,9 @@ def deserialize_dynamodb_image(image: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def process_record(record_data: Dict[str, Any]) -> None:
+    gemini = get_gemini_client()
+    discord = get_discord_client()
+
     session_id = record_data.get("session_id", "")
     is_new_thread = record_data.get("is_new_thread", False)
     channel_id = record_data.get("channel_id", "")

@@ -20,12 +20,34 @@ from nacl.signing import VerifyKey
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-DISCORD_PUBLIC_KEY = os.environ.get("DISCORD_PUBLIC_KEY", "")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "")
 TTL_DAYS = int(os.environ.get("TTL_DAYS", "7"))
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME) if DYNAMODB_TABLE_NAME else None
+ssm = boto3.client("ssm")
+
+_cached_public_key = None
+
+
+def get_discord_public_key() -> str:
+    """Retrieve and cache Discord Public Key from SSM Parameter Store or direct env."""
+    global _cached_public_key
+    if _cached_public_key:
+        return _cached_public_key
+
+    param_name = os.environ.get("DISCORD_PUBLIC_KEY_PARAM")
+    if param_name:
+        try:
+            res = ssm.get_parameter(Name=param_name, WithDecryption=True)
+            _cached_public_key = res["Parameter"]["Value"]
+            return _cached_public_key
+        except Exception as e:
+            logger.error(f"Failed to fetch public key from SSM ({param_name}): {e}")
+
+    _cached_public_key = os.environ.get("DISCORD_PUBLIC_KEY", "")
+    return _cached_public_key
+
 
 # Discord Interaction Types
 INTERACTION_TYPE_PING = 1
@@ -77,8 +99,9 @@ def lambda_handler(event, context):
     # 1. Signature Verification
     signature = get_header(headers, "x-signature-ed25519")
     timestamp = get_header(headers, "x-signature-timestamp")
+    public_key = get_discord_public_key()
 
-    if not verify_discord_signature(signature, timestamp, body, DISCORD_PUBLIC_KEY):
+    if not verify_discord_signature(signature, timestamp, body, public_key):
         logger.error("Invalid request signature")
         return {
             "statusCode": 401,

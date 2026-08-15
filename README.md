@@ -6,17 +6,22 @@ Terraform module to deploy a fully serverless, thread-aware Discord AI Bot power
 
 ## ✨ Features
 
-- **Multi-turn Thread Conversations**:
-  - Automatically creates a new thread when `/ask` is called in a main channel.
-  - Keeps conversation context across turns when continuing in the thread.
+- **Zero-Leakage Secret Management (New in v1.1.0)**:
+  - Secrets (`gemini_api_key`, `discord_bot_token`, `discord_public_key`) are stored in **AWS SSM Parameter Store (SecureString)**.
+  - Terraform 1.11+ `ephemeral` variables and `value_wo` ensure **no plain-text secrets in `terraform.tfstate` or plan files**.
+  - Lambda environment variables contain only parameter paths, preventing accidental console shoulder hacks.
+- **Multi-turn Thread Conversations & Dynamic Context Recovery**:
+  - Automatically creates a new thread when `/ask` is called in a main channel with user prompt quoted.
+  - Keeps conversation context across turns. If invoked mid-thread or without DynamoDB history, dynamically reconstructs context from Discord thread messages!
+- **Gemini 3.7 Flash with Low Latency & Automatic Fallback**:
+  - Configured with `thinkingLevel: LOW` for instant chat replies.
+  - Automatic exponential backoff and seamless fallback to `gemini-3.6-flash` on high demand (503/429).
 - **100% Serverless & Zero Idle Cost**:
   - Uses Discord HTTP Interactions (Lambda Function URL) instead of persistent WebSockets (no ECS/EC2 needed).
 - **Sub-3s Discord Interaction Safe**:
   - Dual-Lambda architecture: Ingress (immediate deferred response) + Worker (DynamoDB Streams CDC).
 - **Auto Cleanup**:
   - Automatically expires conversation history after 7 days using DynamoDB TTL.
-- **Standard Terraform Module**:
-  - Ready to be used via `source = "github.com/nizyu/terraform-aws-discord-gemini"`.
 
 ---
 

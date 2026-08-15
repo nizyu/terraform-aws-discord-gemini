@@ -43,6 +43,18 @@ data "aws_iam_policy_document" "ingress_policy" {
       aws_dynamodb_table.sessions.arn,
     ]
   }
+
+  statement {
+    sid    = "SSMGetParameters"
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+    ]
+    resources = [
+      aws_ssm_parameter.discord_public_key.arn,
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "ingress" {
@@ -97,6 +109,19 @@ data "aws_iam_policy_document" "worker_policy" {
     ]
     resources = [
       "${aws_dynamodb_table.sessions.arn}/stream/*",
+    ]
+  }
+
+  statement {
+    sid    = "SSMGetParameters"
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+    ]
+    resources = [
+      aws_ssm_parameter.discord_bot_token.arn,
+      aws_ssm_parameter.gemini_api_key.arn,
     ]
   }
 }

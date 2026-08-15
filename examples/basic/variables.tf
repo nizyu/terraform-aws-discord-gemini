@@ -18,18 +18,22 @@ variable "discord_application_id" {
 variable "discord_public_key" {
   description = "Discord Public Key"
   type        = string
+  sensitive   = true
+  ephemeral   = true
 }
 
 variable "discord_bot_token" {
   description = "Discord Bot Token"
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
 
 variable "gemini_api_key" {
   description = "Google Gemini API Key"
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
 
 variable "gemini_model" {
