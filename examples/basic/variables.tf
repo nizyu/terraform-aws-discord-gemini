@@ -36,10 +36,10 @@ variable "gemini_api_key" {
   ephemeral   = true
 }
 
-variable "gemini_model" {
-  description = "Gemini model name"
-  type        = string
-  default     = "gemini-3.7-flash"
+variable "gemini_models" {
+  description = "List of Gemini models in priority order with fallback"
+  type        = list(string)
+  default     = ["gemini-3.7-flash", "gemini-3.6-flash"]
 }
 
 variable "ttl_days" {

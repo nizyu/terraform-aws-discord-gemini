@@ -2,7 +2,7 @@
 
 Interacts with Google Gemini REST API v1beta.
 Supports multi-turn chat conversations, thinking levels, exponential backoff retries,
-and automatic fallback to secondary models (e.g. gemini-3.6-flash).
+and sequential fallback across an ordered list of models (e.g. ['gemini-3.7-flash', 'gemini-3.6-flash']).
 """
 
 import json
@@ -10,7 +10,7 @@ import logging
 import time
 import urllib.error
 import urllib.request
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +21,18 @@ class GeminiClient:
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-3.7-flash",
-        fallback_model: Optional[str] = "gemini-3.6-flash",
+        models: Optional[Union[List[str], str]] = None,
     ):
         self.api_key = api_key
-        self.model = model
-        self.fallback_model = fallback_model
+        if isinstance(models, str):
+            self.models = [m.strip() for m in models.split(",") if m.strip()]
+        elif isinstance(models, list):
+            self.models = [m.strip() for m in models if m.strip()]
+        else:
+            self.models = ["gemini-3.7-flash", "gemini-3.6-flash"]
+
+        if not self.models:
+            self.models = ["gemini-3.7-flash"]
 
     def _call_model(
         self,
@@ -98,7 +104,7 @@ class GeminiClient:
         context: List[Dict[str, Any]] = None,
         system_instruction: str = "You are a helpful, friendly, and concise assistant in a family Discord server. Answer in Japanese naturally and politely.",
     ) -> Tuple[str, List[Dict[str, Any]]]:
-        """Generate response from Gemini API with automatic fallback to secondary model on error."""
+        """Generate response from Gemini API with sequential fallback across specified models."""
         if context is None:
             context = []
 
@@ -126,23 +132,26 @@ class GeminiClient:
             }
 
         reply_text = None
-        # 1. Try primary model
-        try:
-            reply_text = self._call_model(self.model, payload, max_retries=2)
-        except Exception as primary_err:
-            if self.fallback_model and self.fallback_model != self.model:
-                logger.warning(
-                    f"Primary model '{self.model}' failed ({primary_err}). "
-                    f"Attempting fallback to '{self.fallback_model}'..."
-                )
-                try:
-                    reply_text = self._call_model(self.fallback_model, payload, max_retries=2)
-                    logger.info(f"Successfully generated response using fallback model '{self.fallback_model}'")
-                except Exception as fallback_err:
-                    logger.error(f"Fallback model '{self.fallback_model}' also failed: {fallback_err}")
-                    raise primary_err
-            else:
-                raise primary_err
+        last_exception = None
+
+        # Iterate through models in priority order
+        for idx, model_name in enumerate(self.models):
+            try:
+                if idx > 0:
+                    logger.warning(f"Attempting fallback to model '{model_name}' (priority #{idx + 1})...")
+
+                reply_text = self._call_model(model_name, payload, max_retries=2)
+                if idx > 0:
+                    logger.info(f"Successfully generated response using fallback model '{model_name}'")
+                break
+            except Exception as err:
+                logger.warning(f"Model '{model_name}' failed: {err}")
+                last_exception = err
+
+        if reply_text is None:
+            if last_exception:
+                raise last_exception
+            raise RuntimeError("All configured Gemini models failed to generate a response.")
 
         # Append model turn to context
         model_turn = {

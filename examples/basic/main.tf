@@ -20,7 +20,7 @@ module "discord_gemini" {
   discord_public_key     = var.discord_public_key
   discord_bot_token      = var.discord_bot_token
   gemini_api_key         = var.gemini_api_key
-  gemini_model           = var.gemini_model
+  gemini_models          = var.gemini_models
   ttl_days               = var.ttl_days
 }
 

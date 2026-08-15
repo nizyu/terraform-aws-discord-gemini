@@ -36,16 +36,10 @@ variable "secrets_version" {
   default     = 1
 }
 
-variable "gemini_model" {
-  description = "Primary Gemini model to use for chat responses (e.g. gemini-3.7-flash)"
-  type        = string
-  default     = "gemini-3.7-flash"
-}
-
-variable "gemini_fallback_model" {
-  description = "Secondary fallback Gemini model when primary model experiences high demand or errors (e.g. gemini-3.6-flash)"
-  type        = string
-  default     = "gemini-3.6-flash"
+variable "gemini_models" {
+  description = "Ordered list of Gemini models to use for chat responses with automatic fallback (e.g. ['gemini-3.7-flash', 'gemini-3.6-flash']). Specify a single-element list to disable fallback."
+  type        = list(string)
+  default     = ["gemini-3.7-flash", "gemini-3.6-flash"]
 }
 
 variable "ttl_days" {

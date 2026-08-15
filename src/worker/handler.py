@@ -23,8 +23,7 @@ from gemini_client import GeminiClient
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
-GEMINI_FALLBACK_MODEL = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-3.6-flash")
+GEMINI_MODELS = os.environ.get("GEMINI_MODELS", "gemini-3.7-flash,gemini-3.6-flash")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "")
 TTL_DAYS = int(os.environ.get("TTL_DAYS", "7"))
 
@@ -78,8 +77,7 @@ def get_discord_bot_token() -> str:
 def get_gemini_client() -> GeminiClient:
     return GeminiClient(
         api_key=get_gemini_api_key(),
-        model=GEMINI_MODEL,
-        fallback_model=GEMINI_FALLBACK_MODEL if GEMINI_FALLBACK_MODEL else None,
+        models=GEMINI_MODELS,
     )
 
 
