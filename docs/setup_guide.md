@@ -8,10 +8,9 @@
 
 1. **Discord アカウント** (Botを導入するサーバーの管理者権限)
 2. **Google AI Studio (Gemini) API Key** ([Google AI Studio](https://aistudio.google.com/) から取得)
-3. **AWS アカウント** (Administrator または Lambda/DynamoDB/IAM を操作可能な権限)
+3. **AWS アカウント** (Administrator または Lambda/DynamoDB/SSM/IAM を操作可能な権限)
 4. **ローカル環境**:
-   - Terraform (`>= 1.5.0`)
-   - Python (`>= 3.12`) および pip
+   - Terraform (`>= 1.11.0`)
    - AWS CLI (認証情報設定済み `aws configure`)
 
 ---
@@ -92,8 +91,9 @@ terraform apply
 
 > [!TIP]
 > **バージョンの指定やローカルビルドを使用する場合**:
-> - デフォルトでは `release_tag = "v1.0.4"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
+> - デフォルトでは `release_tag = "v1.1.0"` のリリースアセットが自動ダウンロードされます。特定のバージョンを指定したい場合は `release_tag = "vX.Y.Z"` を指定してください。
 > - 自身でソースコードを変更してローカルビルドしたい場合は、`python3 scripts/package.py` でビルドした zip のパスを `ingress_zip_path` / `worker_zip_path` に指定することも可能です。
+> - 機密情報（API キー・トークン）は Terraform 1.11+ の `ephemeral` と `value_wo` により、**State ファイルに 1 文字も記録されず**、AWS SSM Parameter Store (SecureString) で安全に管理されます。
 
 ### 3.3 Interactions Endpoint URL の取得
 デプロイが完了すると、Outputs に以下のような Function URL が表示されます:

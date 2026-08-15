@@ -154,3 +154,18 @@ class DiscordClient:
         endpoint = f"/channels/{channel_id}/messages"
         payload = {"content": content}
         return self._request(endpoint, method="POST", payload=payload, use_bot_auth=True)
+
+    def get_channel_messages(
+        self,
+        channel_id: str,
+        limit: int = 15,
+    ) -> List[Dict[str, Any]]:
+        """Retrieve recent messages from a channel or thread."""
+        endpoint = f"/channels/{channel_id}/messages?limit={limit}"
+        res = self._request(endpoint, method="GET", use_bot_auth=True)
+        return res if isinstance(res, list) else []
+
+    def get_channel(self, channel_id: str) -> Dict[str, Any]:
+        """Retrieve channel or thread metadata."""
+        endpoint = f"/channels/{channel_id}"
+        return self._request(endpoint, method="GET", use_bot_auth=True)

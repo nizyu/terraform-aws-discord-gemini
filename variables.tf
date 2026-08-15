@@ -12,24 +12,34 @@ variable "discord_application_id" {
 variable "discord_public_key" {
   description = "Discord Public Key for Ed25519 signature verification"
   type        = string
+  sensitive   = true
+  ephemeral   = true
 }
 
 variable "discord_bot_token" {
   description = "Discord Bot Token for API access (threads and channel messages)"
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
 
 variable "gemini_api_key" {
   description = "Google Gemini API Key from Google AI Studio"
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
 
-variable "gemini_model" {
-  description = "Gemini model to use for chat responses (e.g. gemini-3.7-flash)"
-  type        = string
-  default     = "gemini-3.7-flash"
+variable "secrets_version" {
+  description = "Version number for SSM parameters (increment when rotating secrets to update SSM values)"
+  type        = number
+  default     = 1
+}
+
+variable "gemini_models" {
+  description = "Ordered list of Gemini models to use for chat responses with automatic fallback (e.g. ['gemini-3.7-flash', 'gemini-3.6-flash']). Specify a single-element list to disable fallback."
+  type        = list(string)
+  default     = ["gemini-3.7-flash", "gemini-3.6-flash"]
 }
 
 variable "ttl_days" {
@@ -63,15 +73,15 @@ variable "worker_timeout" {
 }
 
 variable "log_retention_in_days" {
-  description = "CloudWatch Logs retention period in days"
+  description = "Number of days to retain logs in CloudWatch Log Groups"
   type        = number
   default     = 14
 }
 
 variable "release_tag" {
-  description = "Version tag of the release to download pre-built Lambda zip assets from GitHub Releases (e.g. v1.0.4)"
+  description = "Version tag of the release to download pre-built Lambda zip assets from GitHub Releases (e.g. v1.1.0)"
   type        = string
-  default     = "v1.0.4"
+  default     = "v1.1.0"
 }
 
 variable "ingress_zip_path" {

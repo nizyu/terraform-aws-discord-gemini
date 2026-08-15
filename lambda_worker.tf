@@ -20,11 +20,11 @@ resource "aws_lambda_function" "worker" {
 
   environment {
     variables = {
-      GEMINI_API_KEY      = var.gemini_api_key
-      GEMINI_MODEL        = var.gemini_model
-      DISCORD_BOT_TOKEN   = var.discord_bot_token
-      DYNAMODB_TABLE_NAME = aws_dynamodb_table.sessions.name
-      TTL_DAYS            = tostring(var.ttl_days)
+      GEMINI_API_KEY_PARAM    = aws_ssm_parameter.gemini_api_key.name
+      DISCORD_BOT_TOKEN_PARAM = aws_ssm_parameter.discord_bot_token.name
+      GEMINI_MODELS           = join(",", var.gemini_models)
+      DYNAMODB_TABLE_NAME     = aws_dynamodb_table.sessions.name
+      TTL_DAYS                = tostring(var.ttl_days)
     }
   }
 

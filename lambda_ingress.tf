@@ -20,9 +20,9 @@ resource "aws_lambda_function" "ingress" {
 
   environment {
     variables = {
-      DISCORD_PUBLIC_KEY  = var.discord_public_key
-      DYNAMODB_TABLE_NAME = aws_dynamodb_table.sessions.name
-      TTL_DAYS            = tostring(var.ttl_days)
+      DISCORD_PUBLIC_KEY_PARAM = aws_ssm_parameter.discord_public_key.name
+      DYNAMODB_TABLE_NAME      = aws_dynamodb_table.sessions.name
+      TTL_DAYS                 = tostring(var.ttl_days)
     }
   }
 
