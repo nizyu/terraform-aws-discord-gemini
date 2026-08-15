@@ -25,6 +25,7 @@ logger.setLevel(logging.INFO)
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
+GEMINI_FALLBACK_MODEL = os.environ.get("GEMINI_FALLBACK_MODEL", "gemini-3.6-flash")
 DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN", "")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "")
 TTL_DAYS = int(os.environ.get("TTL_DAYS", "7"))
@@ -33,7 +34,11 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME) if DYNAMODB_TABLE_NAME else None
 deserializer = TypeDeserializer()
 
-gemini = GeminiClient(api_key=GEMINI_API_KEY, model=GEMINI_MODEL)
+gemini = GeminiClient(
+    api_key=GEMINI_API_KEY,
+    model=GEMINI_MODEL,
+    fallback_model=GEMINI_FALLBACK_MODEL if GEMINI_FALLBACK_MODEL else None,
+)
 discord = DiscordClient(bot_token=DISCORD_BOT_TOKEN)
 
 
