@@ -75,13 +75,44 @@ def process_record(record_data: Dict[str, Any]) -> None:
     try:
         # 2. Retrieve existing context if continuing in a thread
         context: List[Dict[str, Any]] = []
-        if not is_new_thread and table:
-            res = table.get_item(Key={"session_id": session_id})
-            existing_item = res.get("Item", {})
-            raw_context = existing_item.get("context", [])
-            # Convert dynamodb context to plain python types if needed
-            if isinstance(raw_context, list):
-                context = raw_context
+        if not is_new_thread:
+            if table:
+                try:
+                    res = table.get_item(Key={"session_id": session_id})
+                    existing_item = res.get("Item", {})
+                    raw_context = existing_item.get("context", [])
+                    if isinstance(raw_context, list) and raw_context:
+                        context = raw_context
+                except Exception as db_err:
+                    logger.warning(f"Failed to fetch session from DynamoDB: {db_err}")
+
+            # If no DynamoDB context found (e.g. human-created thread or expired session),
+            # dynamically rebuild conversation context from Discord thread messages!
+            if not context and channel_id:
+                try:
+                    raw_messages = discord.get_channel_messages(channel_id=channel_id, limit=15)
+                    if raw_messages:
+                        # Sort chronologically (oldest to newest)
+                        sorted_messages = sorted(raw_messages, key=lambda m: int(m.get("id", "0")))
+                        for msg in sorted_messages:
+                            msg_content = msg.get("content", "").strip()
+                            author_info = msg.get("author", {})
+                            author_name = author_info.get("global_name") or author_info.get("username") or "User"
+                            is_bot = author_info.get("bot", False)
+
+                            # Skip empty messages or placeholder messages
+                            if not msg_content or "考え中" in msg_content:
+                                continue
+
+                            role = "model" if is_bot else "user"
+                            formatted_text = msg_content if role == "model" else f"{author_name}: {msg_content}"
+                            context.append({
+                                "role": role,
+                                "parts": [{"text": formatted_text}],
+                            })
+                        logger.info(f"Rebuilt context from {len(context)} Discord thread messages")
+                except Exception as thread_err:
+                    logger.warning(f"Failed to retrieve thread history from Discord API: {thread_err}")
 
         # 3. Generate response with Gemini API
         system_instruction = (
@@ -94,13 +125,14 @@ def process_record(record_data: Dict[str, Any]) -> None:
             system_instruction=system_instruction,
         )
 
-        chunks = split_message(reply_text)
+        # Format quoted prompt
+        quoted_prompt = "\n".join(f"> {line}" for line in prompt.splitlines())
 
         # 4. Handle Discord responses
         if is_new_thread:
-            # First, update the original interaction message
+            # First, update the original interaction message with full quoted prompt
             prompt_preview = (prompt[:35] + "...") if len(prompt) > 35 else prompt
-            summary_msg = f"🧵 **質問:** {prompt_preview}\nスレッドを作成して回答しています..."
+            summary_msg = f"💬 **{user_name} さんの質問:**\n{quoted_prompt}\n\n🧵 *スレッドで回答しています...*"
             orig_msg = discord.edit_original_interaction_response(
                 application_id=application_id,
                 interaction_token=interaction_token,
@@ -130,6 +162,7 @@ def process_record(record_data: Dict[str, Any]) -> None:
             thread_id = thread_obj.get("id") if thread_obj else channel_id
 
             # Post answers in thread
+            chunks = split_message(reply_text)
             for chunk in chunks:
                 discord.send_channel_message(channel_id=thread_id, content=chunk)
 
@@ -159,7 +192,9 @@ def process_record(record_data: Dict[str, Any]) -> None:
                 )
 
         else:
-            # In existing thread: edit the original deferred message with the first chunk
+            # In existing thread: include user's prompt so it is preserved in chat history
+            full_response = f"💬 **{user_name}:**\n{quoted_prompt}\n\n🤖 **Gemini:**\n{reply_text}"
+            chunks = split_message(full_response)
             first_chunk = chunks[0] if chunks else "回答を取得できませんでした。"
             discord.edit_original_interaction_response(
                 application_id=application_id,
